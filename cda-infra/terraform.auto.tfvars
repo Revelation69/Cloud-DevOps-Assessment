@@ -36,18 +36,34 @@ enable_irsa               = true
 
 eks_managed_node_groups = {
 
-  test = {
+  spot = {
     desired_size = 1
     min_size     = 1
     max_size     = 10
 
-    instance_types = ["t3.small"]
+    instance_types = ["t2.large"]
     capacity_type  = "ON_DEMAND"
   }
 
+  general = {
+    desired_size = 1
+    min_size     = 1
+    max_size     = 10
+
+    instance_types = ["t3.medium"]
+    capacity_type  = "ON_DEMAND"
+  }
+  spot = {
+    desired_size = 1
+    min_size     = 1
+    max_size     = 10
+
+    instance_types = ["t3.medium"]
+    capacity_type  = "SPOT"
+  }
 }
 
-admin_username     = "Michael"
+admin_username     = "Mike"
 developer_username = "Ajala"
 
 namespace = "cda"
@@ -92,6 +108,6 @@ egress_with_cidr_blocks = []
 ################
 # ECR variables
 ################
-repository_name         = "customdevopsassessmentecr"
+repository_name         = "cloudevopsassessmentecr"
 repository_type         = "private"
 create_lifecycle_policy = false
