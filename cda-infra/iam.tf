@@ -1,0 +1,115 @@
+## Policy to allow full EKS access for admin
+module "eks_admin_iam_policy" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version = "5.3.1"
+
+  name          = "allow-eks-access-admin"
+  create_policy = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = ["eks:DescribeCluster"]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+## Policy to allow limited access to EKS for Developers
+module "eks_developer_iam_policy" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version = "5.3.1"
+
+  name          = "allow-eks-access-developer"
+  create_policy = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = ["eks:DescribeCluster"]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+
+## IAM Role that will be used by admin to access the cluster
+module "eks_admins_iam_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "5.3.1"
+
+  role_name         = "eks-admin"
+  create_role       = true
+  role_requires_mfa = false
+
+  custom_role_policy_arns = [module.eks_admin_iam_policy.arn]
+
+  trusted_role_arns = [
+    "arn:aws:iam::${module.vpc.vpc_owner_id}:root"
+  ]
+}
+
+## IAM Role that will be used by developers to access the cluster 
+module "eks_developer_iam_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "5.3.1"
+
+  role_name         = "eks-developer"
+  create_role       = true
+  role_requires_mfa = false
+
+  custom_role_policy_arns = [module.eks_developer_iam_policy.arn]
+
+  trusted_role_arns = [
+    "arn:aws:iam::${module.vpc.vpc_owner_id}:root"
+  ]
+}
+
+## IAM policy to assume the IAM role for admin
+module "allow_assume_eks_admins_iam_policy" {
+  source        = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version       = "5.3.1"
+  name          = "allow-assume-eks-admin-iam-role"
+  create_policy = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sts:AssumeRole",
+        ]
+        Effect   = "Allow"
+        Resource = module.eks_admins_iam_role.iam_role_arn
+      },
+    ]
+  })
+}
+
+## IAM policy to assume the IAM role for developers
+module "allow_assume_eks_developer_iam_policy" {
+  source        = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version       = "5.3.1"
+  name          = "allow-assume-eks-developer-iam-role"
+  create_policy = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sts:AssumeRole",
+        ]
+        Effect   = "Allow"
+        Resource = module.eks_developer_iam_role.iam_role_arn
+      },
+    ]
+  })
+}
+
