@@ -1,18 +1,18 @@
 module "vpc" {
-  source          = "./modules/vpc"
-  vpc_name        = var.vpc_name
-  cidr            = var.cidr
-  azs             = ["${var.region}a", "${var.region}b"]
-  private_subnets = var.private_subnets
-  public_subnets  = var.public_subnets
+  source                       = "./modules/vpc"
+  vpc_name                     = var.vpc_name
+  cidr                         = var.cidr
+  azs                          = ["${var.region}a", "${var.region}b"]
+  private_subnets              = var.private_subnets
+  public_subnets               = var.public_subnets
   create_database_subnet_group = var.create_database_subnet_group
   database_subnets             = var.database_subnets
   database_subnet_group_name   = var.database_subnet_group_name
-  enable_nat_gateway   = var.enable_nat_gateway
-  single_nat_gateway   = var.single_nat_gateway
-  enable_dns_hostnames = var.enable_dns_hostnames
-  enable_dns_support   = var.enable_dns_support
-  tags                 = var.tags
+  enable_nat_gateway           = var.enable_nat_gateway
+  single_nat_gateway           = var.single_nat_gateway
+  enable_dns_hostnames         = var.enable_dns_hostnames
+  enable_dns_support           = var.enable_dns_support
+  tags                         = var.tags
 }
 
 
@@ -27,8 +27,6 @@ module "rds" {
   allocated_storage          = var.allocated_storage
   vpc_security_group_ids     = module.sg-rds.security_group_id
   db_name                    = var.db_name
-  username                   = var.username
-  password                   = var.password
   port                       = var.port
   database_subnets           = var.database_subnets
   family                     = var.family
@@ -36,6 +34,7 @@ module "rds" {
   deletion_protection        = var.deletion_protection
   tags                       = var.tags
 }
+
 
 module "sg-rds" {
   source                   = "./modules/sg"
@@ -65,9 +64,9 @@ module "eks" {
   tags                            = var.tags
 }
 
-resource "kubernetes_namespace" "online-boutique" {
+resource "kubernetes_namespace" "cda" {
   metadata {
-    name = "online-boutique"
+    name = "cda"
 
     labels = {
       managed_by = "terraform"
@@ -77,14 +76,14 @@ resource "kubernetes_namespace" "online-boutique" {
 
 resource "kubernetes_role" "namespace-viewer" {
   metadata {
-    name = "namespace-viewer"
-    namespace = "online-boutique"
+    name      = "namespace-viewer"
+    namespace = "cda"
   }
 
   rule {
-    api_groups     = [""]
-    resources      = ["pods", "services", "secrets", "configmap", "persistentvolumes"]
-    verbs          = ["get", "list", "watch", "describe"]
+    api_groups = [""]
+    resources  = ["pods", "services", "secrets", "configmap", "persistentvolumes"]
+    verbs      = ["get", "list", "watch", "describe"]
   }
 
   rule {
@@ -97,7 +96,7 @@ resource "kubernetes_role" "namespace-viewer" {
 resource "kubernetes_role_binding" "namespace-viewer" {
   metadata {
     name      = "namespace-viewer"
-    namespace = "online-boutique"
+    namespace = "cda"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -124,26 +123,26 @@ resource "kubernetes_cluster_role" "cluster_viewer" {
 
   rule {
     api_groups = [""]
-    resources = ["pods/portforward"]
-    verbs = ["get", "list", "create"]
+    resources  = ["pods/portforward"]
+    verbs      = ["get", "list", "create"]
   }
 
   rule {
     api_groups = ["apiextensions.k8s.io"]
-    resources = ["customresourcedefinitions"]
-    verbs = ["get", "list", "describe"]
+    resources  = ["customresourcedefinitions"]
+    verbs      = ["get", "list", "describe"]
   }
 
   rule {
     api_groups = [""]
-    resources = ["pods/exec", "pods/attach"]
-    verbs = ["get", "list", "create"]
+    resources  = ["pods/exec", "pods/attach"]
+    verbs      = ["get", "list", "create"]
   }
-  
+
   rule {
     api_groups = [""]
-    resources = ["pods"]
-    verbs = ["get", "list", "create", "describe", "delete", "update"]
+    resources  = ["pods"]
+    verbs      = ["get", "list", "create", "describe", "delete", "update"]
   }
 }
 
@@ -153,8 +152,8 @@ resource "kubernetes_cluster_role_binding" "cluster_viewer" {
   }
 
   role_ref {
-    kind     = "ClusterRole"
-    name     = "cluster-viewer"
+    kind      = "ClusterRole"
+    name      = "cluster-viewer"
     api_group = "rbac.authorization.k8s.io"
   }
 

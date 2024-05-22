@@ -33,12 +33,7 @@ variable "port" {
 variable "vpc_security_group_ids" {
   type = list(string)
 }
-variable "username" {
-  type = string
-}
-variable "password" {
-  type = string
-}
+
 variable "family" {
   type    = string
   default = "mysql8.0"

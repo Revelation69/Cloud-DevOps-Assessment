@@ -145,12 +145,6 @@ variable "allocated_storage" {
 variable "db_name" {
   type = string
 }
-variable "username" {
-  type = string
-}
-variable "password" {
-  type = string
-}
 variable "port" {
   type = string
 }

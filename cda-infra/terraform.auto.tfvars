@@ -1,21 +1,21 @@
 ##############
 # VPC Variables
 ###############
-vpc_name        = "Cloud-Devops-Assessment-VPC"
-cidr            = "10.0.0.0/16"
-region          = "us-east-1"
-public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
-private_subnets = ["10.0.3.0/24", "10.0.4.0/24"]
+vpc_name                     = "Cloud-Devops-Assessment-VPC"
+cidr                         = "10.0.0.0/16"
+region                       = "us-east-1"
+public_subnets               = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnets              = ["10.0.3.0/24", "10.0.4.0/24"]
 create_database_subnet_group = true
 database_subnets             = ["10.0.5.0/24", "10.0.6.0/24"]
 database_subnet_group_name   = "db-subnet"
-enable_nat_gateway   = true
-single_nat_gateway   = true
-enable_dns_hostnames = true
-enable_dns_support   = true
+enable_nat_gateway           = true
+single_nat_gateway           = true
+enable_dns_hostnames         = true
+enable_dns_support           = true
 tags = {
   Terraform   = "true"
-  Environment = "dev"
+  Environment = "cda"
 }
 
 ################
@@ -26,10 +26,10 @@ cluster_version                 = "1.28"
 cluster_endpoint_private_access = true
 cluster_endpoint_public_access  = true
 cluster_addons = {
-    kube-proxy = {}
-    vpc-cni    = {}
-    coredns = {}
-  }
+  kube-proxy = {}
+  vpc-cni    = {}
+  coredns    = {}
+}
 
 manage_aws_auth_configmap = true
 enable_irsa               = true
@@ -40,7 +40,7 @@ eks_managed_node_groups = {
     desired_size = 1
     min_size     = 1
     max_size     = 10
-    
+
     instance_types = ["t3.small"]
     capacity_type  = "ON_DEMAND"
   }

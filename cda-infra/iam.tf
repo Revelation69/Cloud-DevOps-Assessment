@@ -10,7 +10,7 @@ module "eks_admin_iam_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = ["eks:DescribeCluster"]
+        Action   = ["eks:DescribeCluster"]
         Effect   = "Allow"
         Resource = "*"
       },
@@ -30,7 +30,7 @@ module "eks_developer_iam_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = ["eks:DescribeCluster"]
+        Action   = ["eks:DescribeCluster"]
         Effect   = "Allow"
         Resource = "*"
       },
@@ -113,3 +113,46 @@ module "allow_assume_eks_developer_iam_policy" {
   })
 }
 
+
+## Create Admin users to access the cluster
+module "admin_user" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-user"
+  version                       = "5.3.1"
+  name                          = var.admin_username
+  create_iam_access_key         = false
+  create_iam_user_login_profile = false
+  force_destroy                 = true
+}
+
+## Create Developer users to access the cluster
+module "developer_user" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-user"
+  version                       = "5.3.1"
+  name                          = var.developer_username
+  create_iam_access_key         = false
+  create_iam_user_login_profile = false
+  force_destroy                 = true
+}
+
+## Create an IAM group with users and attach assume policy
+module "eks_admins_iam_group" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
+  version = "5.3.1"
+
+  name                              = "eks-admin"
+  attach_iam_self_management_policy = false
+  create_group                      = true
+  group_users                       = [module.admin_user.iam_user_name]
+  custom_group_policy_arns          = [module.allow_assume_eks_admins_iam_policy.arn]
+}
+
+module "eks_developer_iam_group" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
+  version = "5.3.1"
+
+  name                              = "eks-developer"
+  attach_iam_self_management_policy = false
+  create_group                      = true
+  group_users                       = [module.developer_user.iam_user_name]
+  custom_group_policy_arns          = [module.allow_assume_eks_developer_iam_policy.arn]
+}
