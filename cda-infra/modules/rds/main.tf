@@ -20,6 +20,8 @@ module "rds" {
   allocated_storage    = var.allocated_storage
   vpc_security_group_ids = var.vpc_security_group_ids
   db_name              = var.db_name
+  username = local.db_creds.username
+  password = local.db_creds.password
   port                 = var.port
   subnet_ids           = var.database_subnets
   family               = var.family

@@ -1,0 +1,109 @@
+# name: CI
+
+# # Controls when the workflow will run
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#       - develop
+
+#   # Allows you to run this workflow manually from the Actions tab
+#   workflow_dispatch:
+
+# # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# jobs:
+#   # This workflow contains one job called pr
+#   pr:
+#     name: Pull request
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       pull-requests: write
+
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - name: Configure AWS Credentials Action For GitHub Actions
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_DEV }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+#           aws-region: "us-east-1"  # replace with your region if different
+
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v2
+
+
+#       - name: Terraform Format
+#         id: fmt
+#         run: terraform fmt -check -recursive
+#         continue-on-error: true
+
+#       - name: Terraform Init
+#         id: init
+#         run: terraform init -backend-config environments/dev/backend.conf
+
+#       - name: Terraform Validate
+#         id: validate
+#         run: terraform validate -no-color
+
+#       - name: Terraform Plan
+#         id: plan
+#         run: terraform plan -no-color -var-file environments/dev/dev.tfvars
+
+#       - name: Comment Results on PR
+#         uses: actions/github-script@v6
+#         env:
+#           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+#         with:
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+#           script: |
+#             // 1. Retrieve existing bot comments for the PR
+#             const { data: comments } = await github.rest.issues.listComments({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               issue_number: context.issue.number,
+#             })
+#             const botComment = comments.find(comment => {
+#               return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
+#             }) 
+#             // 2. Prepare format of the comment
+#             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+#             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+#             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+#             <details><summary>Validation Output</summary>
+
+#             \`\`\`\n
+#             ${{ steps.validate.outputs.stdout }}
+#             \`\`\`
+
+#             </details>
+
+#             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+#             <details><summary>Show Plan</summary>
+
+#             \`\`\`\n
+#             ${process.env.PLAN}
+#             \`\`\`
+
+#             </details>
+
+#             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+#             // 3. If we have a comment, update it, otherwise create a new one
+#             if (botComment) {
+#               github.rest.issues.updateComment({
+#                 owner: context.repo.owner,
+#                 repo: context.repo.repo,
+#                 comment_id: botComment.id,
+#                 body: output
+#               })
+#             } else {
+#               github.rest.issues.createComment({
+#                 issue_number: context.issue.number,
+#                 owner: context.repo.owner,
+#                 repo: context.repo.repo,
+#                 body: output
+#               })
+#             }
