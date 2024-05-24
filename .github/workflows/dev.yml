@@ -41,8 +41,8 @@ jobs:
         run: terraform plan -no-color -var-file=environments/dev/dev.tfvars
 
       # Uncomment the following lines if you want to automatically apply the plan
-      # - name: Terraform Apply
-      #   run: terraform apply -no-color -auto-approve -var-file=environments/dev/dev.tfvars
+      - name: Terraform Apply
+        run: terraform apply -no-color -auto-approve -var-file=environments/dev/dev.tfvars
 
-      - name: Terraform Destroy
-        run: terraform destroy -no-color -auto-approve -var-file=environments/dev/dev.tfvars
+      # - name: Terraform Destroy
+      #   run: terraform destroy -no-color -auto-approve -var-file=environments/dev/dev.tfvars
