@@ -105,9 +105,18 @@ ingress_with_cidr_blocks = [
 egress_with_cidr_blocks = []
 
 
+
 ################
-# ECR variables
+# Frontend ECR variables
 ################
-repository_name         = "cloudevopsassessmentecr"
-repository_type         = "private"
-create_lifecycle_policy = false
+frontend_repository_name         = "frontend"
+frontend_repository_type         = "private"
+frontend_create_lifecycle_policy = false
+
+################
+# Backend ECR variables
+################
+backend_repository_name         = "backend"
+backend_repository_type         = "private"
+backend_create_lifecycle_policy = false
+

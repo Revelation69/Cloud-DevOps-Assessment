@@ -64,6 +64,20 @@ module "eks" {
   tags                            = var.tags
 }
 
+module "ecr" {
+  source                   = "./modules/ecr"
+  frontend_repository_name = var.frontend_repository_name
+  frontend_repository_type = var.frontend_repository_type
+  frontend_create_lifecycle_policy = var.frontend_create_lifecycle_policy
+  backend_repository_name        = var.backend_repository_name
+  backend_repository_type = var.backend_repository_type
+  backend_create_lifecycle_policy  = var.backend_create_lifecycle_policy
+  tags                              = var.tags
+}
+
+
+
+
 resource "kubernetes_namespace" "cda" {
   metadata {
     name = "cda"
