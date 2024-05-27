@@ -120,3 +120,9 @@ backend_repository_name         = "backend"
 backend_repository_type         = "private"
 backend_create_lifecycle_policy = false
 
+#####################
+# Jenkins-ec2
+########################
+instance-name = "Jenkins-server"
+key-name      = "jenkins"
+iam-role      = "Jenkins-iam-role"

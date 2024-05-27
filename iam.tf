@@ -156,3 +156,34 @@ module "eks_developer_iam_group" {
   group_users                       = [module.developer_user.iam_user_name]
   custom_group_policy_arns          = [module.allow_assume_eks_developer_iam_policy.arn]
 }
+
+resource "aws_iam_role_policy_attachment" "iam-policy" {
+  role = aws_iam_role.iam-role.name
+  # Just for testing purpose, don't try to give administrator access
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+
+
+resource "aws_iam_role" "iam-role" {
+  name               = var.iam-role
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_instance_profile" "instance-profile" {
+  name = "Jenkins-instance-profile"
+  role = aws_iam_role.iam-role.name
+}

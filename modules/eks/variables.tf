@@ -49,4 +49,8 @@ variable "tags" {
   default = {}
 }
 
+variable "iam_role_additional_policies" {
+  # type = list(string)
+  type = map(string)
+}
 

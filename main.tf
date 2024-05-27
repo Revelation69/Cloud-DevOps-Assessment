@@ -61,21 +61,68 @@ module "eks" {
   eks_managed_node_groups         = var.eks_managed_node_groups
   manage_aws_auth_configmap       = var.manage_aws_auth_configmap
   aws_auth_roles                  = local.aws_auth_roles
+  iam_role_additional_policies    = local.iam_role_additional_policies
   tags                            = var.tags
 }
 
 module "ecr" {
-  source                   = "./modules/ecr"
-  frontend_repository_name = var.frontend_repository_name
-  frontend_repository_type = var.frontend_repository_type
+  source                           = "./modules/ecr"
+  frontend_repository_name         = var.frontend_repository_name
+  frontend_repository_type         = var.frontend_repository_type
   frontend_create_lifecycle_policy = var.frontend_create_lifecycle_policy
-  backend_repository_name        = var.backend_repository_name
-  backend_repository_type = var.backend_repository_type
+  backend_repository_name          = var.backend_repository_name
+  backend_repository_type          = var.backend_repository_type
   backend_create_lifecycle_policy  = var.backend_create_lifecycle_policy
-  tags                              = var.tags
+  tags                             = var.tags
 }
 
 
+resource "aws_instance" "ec2" {
+  ami                    = data.aws_ami.ami.image_id
+  instance_type          = "t2.2xlarge"
+  key_name               = var.key-name
+  subnet_id              = module.vpc.public_subnets[0]
+  vpc_security_group_ids = [aws_security_group.security-group.id]
+  iam_instance_profile   = aws_iam_instance_profile.instance-profile.name
+  root_block_device {
+    volume_size = 30
+  }
+  user_data = templatefile("./tools-install.sh", {})
+
+  tags = {
+    Name = var.instance-name
+  }
+}
+
+resource "aws_security_group" "security-group" {
+  vpc_id      = module.vpc.vpc_id
+  description = "Allowing Jenkins,  SSH Access"
+
+  ingress = [
+    for port in [22, 8080, 9000, 9090, 80] : {
+      description      = "TLS from VPC"
+      from_port        = port
+      to_port          = port
+      protocol         = "tcp"
+      ipv6_cidr_blocks = ["::/0"]
+      self             = false
+      prefix_list_ids  = []
+      security_groups  = []
+      cidr_blocks      = ["0.0.0.0/0"]
+    }
+  ]
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = var.sg-name
+  }
+}
 
 
 resource "kubernetes_namespace" "cda" {

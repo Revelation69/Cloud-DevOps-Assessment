@@ -85,17 +85,10 @@ variable "cluster_addons" {
   type = map(any)
 }
 
-# variable "subnet_ids" {
-#   type = list(string)
-# }
-
 variable "enable_irsa" {
   type = bool
 }
 
-# variable "eks_managed_node_group_defaults" {
-#   type = map(any)
-# }
 
 variable "eks_managed_node_groups" {
   type = map(any)
@@ -209,19 +202,6 @@ variable "egress_rules" {
 
 
 ## ECR VARIABLE
-variable "repository_name" {
-  type = string
-}
-
-variable "repository_type" {
-  type = string
-}
-
-
-variable "create_lifecycle_policy" {
-  type = bool
-}
-
 
 variable "frontend_repository_name" {
   description = "Name of the frontend repository"
@@ -259,3 +239,6 @@ variable "backend_create_lifecycle_policy" {
 
 
 
+variable "instance-name" {}
+variable "key-name" {}
+variable "iam-role" {}
